@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Worker with Blob URL</title>
+</head>
+<body>
+
+<h1>Service Worker Blob URL Demonstration</h1>
+<button onclick="registerServiceWorker()">Register Service Worker</button>
+<button onclick="fetchSomething()">Fetch Something</button>
+
+<script>
+    function registerServiceWorker() {
+        const serviceWorkerCode = `
+            self.addEventListener('install', (event) => {
+                console.log('Service worker installed');
+            });
+
+            self.addEventListener('fetch', (event) => {
+                console.log('Fetch intercepted:', event.request.url);
+                event.respondWith(fetch(event.request));
+            });
+        `;
+
+        const blob = new Blob([serviceWorkerCode], { type: 'application/javascript' });
+        const blobURL = URL.createObjectURL(blob);
+
+        navigator.serviceWorker.register(blobURL).then((registration) => {
+            console.log('Service worker registered with scope:', registration.scope);
+            URL.revokeObjectURL(blobURL); // Clean up the blobURL
+        }).catch((error) => {
+            console.log('Service worker registration failed:', error);
+        });
+    }
+
+    function fetchSomething() {
+        fetch('https://jsonplaceholder.typicode.com/todos/1')
+            .then(response => response.json())
+            .then(json => console.log(json))
+            .catch(error => console.log('Fetch error:', error));
+    }
+</script>
+
+</body>
+</html>
