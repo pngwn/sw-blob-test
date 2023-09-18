@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Worker with Blob URL</title>
+    <title>Service Worker Inline Worker Demonstration</title>
 </head>
 <body>
 
-<h1>Service Worker Blob URL Demonstration</h1>
+<h1>Service Worker Inline Worker Demonstration</h1>
 <button onclick="registerServiceWorker()">Register Service Worker</button>
 <button onclick="fetchSomething()">Fetch Something</button>
 
@@ -27,12 +27,20 @@
         const blob = new Blob([serviceWorkerCode], { type: 'application/javascript' });
         const blobURL = URL.createObjectURL(blob);
 
-        navigator.serviceWorker.register(blobURL).then((registration) => {
-            console.log('Service worker registered with scope:', registration.scope);
-            URL.revokeObjectURL(blobURL); // Clean up the blobURL
-        }).catch((error) => {
-            console.log('Service worker registration failed:', error);
-        });
+        fetch(blobURL)
+            .then(response => response.text())
+            .then(content => {
+                const newBlob = new Blob([content], { type: 'application/javascript' });
+                const newBlobURL = URL.createObjectURL(newBlob);
+
+                // Register the service worker
+                navigator.serviceWorker.register(newBlobURL).then((registration) => {
+                    console.log('Service worker registered with scope:', registration.scope);
+                    URL.revokeObjectURL(newBlobURL); // Clean up the blobURL
+                }).catch((error) => {
+                    console.log('Service worker registration failed:', error);
+                });
+            });
     }
 
     function fetchSomething() {
